@@ -1,92 +1,57 @@
-/* ── Custom Cursor ────────────────────────────────────────── */
-const cursor = document.getElementById('cursor');
-const follower = document.getElementById('cursorFollower');
-
-if (window.innerWidth > 768 && cursor && follower) {
-  let mx = 0, my = 0, fx = 0, fy = 0;
-
-  document.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top = my + 'px';
-  });
-
-  function animFollower() {
-    fx += (mx - fx) * 0.12;
-    fy += (my - fy) * 0.12;
-    follower.style.left = fx + 'px';
-    follower.style.top = fy + 'px';
-    requestAnimationFrame(animFollower);
-  }
-  animFollower();
-}
-
-/* ── Nav scroll ───────────────────────────────────────────── */
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 40);
-}, { passive: true });
-
-/* ── Mobile Menu ──────────────────────────────────────────── */
+/* ── Mobile Menu ─────────────────────────────────────────── */
 const burger = document.getElementById('burger');
 const mobileMenu = document.getElementById('mobileMenu');
+const mobileClose = document.getElementById('mobileClose');
+
+function openMenu() {
+  mobileMenu.classList.add('open');
+  burger.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMenu() {
+  mobileMenu.classList.remove('open');
+  burger.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 burger?.addEventListener('click', () => {
-  const open = mobileMenu.classList.toggle('open');
-  burger.classList.toggle('open', open);
-  document.body.style.overflow = open ? 'hidden' : '';
+  mobileMenu.classList.contains('open') ? closeMenu() : openMenu();
 });
-
+mobileClose?.addEventListener('click', closeMenu);
 mobileMenu?.querySelectorAll('.mobile-link, .mobile-btn').forEach(el => {
-  el.addEventListener('click', () => {
-    mobileMenu.classList.remove('open');
-    burger.classList.remove('open');
-    document.body.style.overflow = '';
-  });
+  el.addEventListener('click', closeMenu);
 });
 
-/* ── Price Tabs ───────────────────────────────────────────── */
-const tabs = document.querySelectorAll('.price-tab');
-const panels = document.querySelectorAll('.price-panel');
-
-tabs.forEach(tab => {
+/* ── Price Tabs ──────────────────────────────────────────── */
+document.querySelectorAll('.price-tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    const target = tab.dataset.tab;
-
-    tabs.forEach(t => t.classList.remove('active'));
-    panels.forEach(p => p.classList.remove('active'));
-
+    document.querySelectorAll('.price-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.price-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
-    const panel = document.getElementById('panel-' + target);
+    const panel = document.getElementById('panel-' + tab.dataset.tab);
     if (panel) panel.classList.add('active');
   });
 });
 
-/* ── FAQ Accordion ────────────────────────────────────────── */
+/* ── FAQ ─────────────────────────────────────────────────── */
 document.querySelectorAll('.faq-item').forEach(item => {
-  const btn = item.querySelector('.faq-q');
-  btn?.addEventListener('click', () => {
+  item.querySelector('.faq-q')?.addEventListener('click', () => {
     const isOpen = item.classList.contains('open');
-    // close all
     document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
     if (!isOpen) item.classList.add('open');
   });
 });
 
-/* ── Reviews Slider ───────────────────────────────────────── */
+/* ── Reviews slider ──────────────────────────────────────── */
 const track = document.getElementById('reviewsTrack');
 const prevBtn = document.getElementById('reviewPrev');
 const nextBtn = document.getElementById('reviewNext');
-
 if (track && prevBtn && nextBtn) {
-  const scrollAmount = () => track.offsetWidth * 0.6;
-  nextBtn.addEventListener('click', () => track.scrollBy({ left: scrollAmount(), behavior: 'smooth' }));
-  prevBtn.addEventListener('click', () => track.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }));
+  nextBtn.addEventListener('click', () => track.scrollBy({ left: 320, behavior: 'smooth' }));
+  prevBtn.addEventListener('click', () => track.scrollBy({ left: -320, behavior: 'smooth' }));
 }
 
-/* ── Scroll Reveal ────────────────────────────────────────── */
-const revealEls = document.querySelectorAll('[data-reveal]');
-
+/* ── Scroll Reveal ───────────────────────────────────────── */
 const observer = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -95,33 +60,25 @@ const observer = new IntersectionObserver(entries => {
       observer.unobserve(entry.target);
     }
   });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+}, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
 
-revealEls.forEach(el => observer.observe(el));
-
-/* ── Magnetic Buttons ─────────────────────────────────────── */
-if (window.innerWidth > 768) {
-  document.querySelectorAll('.magnetic').forEach(btn => {
-    btn.addEventListener('mousemove', e => {
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      btn.style.transform = `translate(${x * 0.2}px, ${y * 0.25}px) translateY(-2px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = '';
-    });
-  });
-}
-
-/* ── Smooth anchor scroll ─────────────────────────────────── */
+/* ── Smooth anchor ───────────────────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const id = a.getAttribute('href').slice(1);
     const el = document.getElementById(id);
-    if (el) {
-      e.preventDefault();
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
 });
+
+/* ── Sticky CTA hide when hero visible ───────────────────── */
+const stickyCta = document.getElementById('stickyCta');
+const heroActions = document.querySelector('.hero-actions');
+if (stickyCta && heroActions) {
+  const heroObs = new IntersectionObserver(entries => {
+    stickyCta.style.opacity = entries[0].isIntersecting ? '0' : '1';
+    stickyCta.style.pointerEvents = entries[0].isIntersecting ? 'none' : 'all';
+  }, { threshold: 0.5 });
+  heroObs.observe(heroActions);
+}
